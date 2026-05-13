@@ -11,17 +11,17 @@ const client = new Client({
 const APPEAL_LINK = 'https://discord.gg/RuTATTeRqb';
 
 client.on('ready', () => {
-  console.log(`Bot connecté en tant que ${client.user.tag}`);
+  console.log(Bot connecté en tant que ${client.user.tag});
 });
 
 client.on('guildBanAdd', async (ban) => {
   try {
     await ban.user.send(
-      `Tu as été banni du serveur **${ban.guild.name}**.\n\nPour faire une demande de débann, rejoins ce serveur : ${APPEAL_LINK}`
+      Tu as été banni du serveur **${ban.guild.name}**.\n\nPour faire une demande de débann, rejoins ce serveur : ${APPEAL_LINK}
     );
-    console.log(`MP envoyé à ${ban.user.tag}`);
+    console.log(MP envoyé à ${ban.user.tag});
   } catch (err) {
-    console.log(`Impossible d'envoyer un MP à ${ban.user.tag}`);
+    console.log(Impossible d'envoyer un MP à ${ban.user.tag});
   }
 });
 
