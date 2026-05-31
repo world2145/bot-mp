@@ -21,20 +21,18 @@ http.createServer((req, res) => {
 }).listen(PORT, () => {
   console.log(`Serveur HTTP actif sur le port ${PORT}`);
 });
-// ──────────────────────────────────────────────────────────────────────────────
 
 const RAISONS_PREDEFINIES = [
-  { name: '🔇 Spam', value: 'Spam' },
-  { name: '🤬 Insultes / Toxicité', value: 'Insultes / Toxicité' },
-  { name: '📢 Publicité non autorisée', value: 'Publicité non autorisée' },
-  { name: '🔞 Contenu inapproprié', value: 'Contenu inapproprié' },
-  { name: '🤖 Raid / Nuisance au serveur', value: 'Raid / Nuisance au serveur' },
-  { name: '⚠️ Non-respect du règlement', value: 'Non-respect du règlement' },
-  { name: '✏️ Raison personnalisée', value: 'CUSTOM' },
+  { name: 'Spam', value: 'Spam' },
+  { name: 'Insultes / Toxicite', value: 'Insultes / Toxicite' },
+  { name: 'Publicite non autorisee', value: 'Publicite non autorisee' },
+  { name: 'Contenu inapproprie', value: 'Contenu inapproprie' },
+  { name: 'Raid / Nuisance au serveur', value: 'Raid / Nuisance au serveur' },
+  { name: 'Non-respect du reglement', value: 'Non-respect du reglement' },
+  { name: 'Raison personnalisee', value: 'CUSTOM' },
 ];
 
 const commands = [
-  // ── Commandes existantes ──────────────────────────────────────────────────
   new SlashCommandBuilder()
     .setName('ban')
     .setDescription('Bannir un membre et lui envoyer un MP')
@@ -75,27 +73,29 @@ const commands = [
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .toJSON(),
 
-  // ── /sanction : annonce uniquement, rien d'appliqué ──────────────────────
   new SlashCommandBuilder()
     .setName('sanction')
-    .setDescription('Annoncer une sanction (admin uniquement) — aucune action réelle')
+    .setDescription('Annoncer une sanction (admin uniquement)')
     .addUserOption(option =>
-      option.setName('membre').setDescription('Le membre sanctionné').setRequired(true))
+      option.setName('membre').setDescription('Le membre sanctionne').setRequired(true))
     .addStringOption(option =>
       option.setName('type').setDescription('Type de sanction').setRequired(true)
         .addChoices(
-          { name: '🔇 Mute', value: 'mute' },
-          { name: '👢 Expulsion', value: 'kick' },
-          { name: '🔨 Ban temporaire', value: 'ban_temp' },
-          { name: '⛔ Ban définitif', value: 'ban_def' },
+          { name: 'Mute', value: 'mute' },
+          { name: 'Expulsion', value: 'kick' },
+          { name: 'Ban temporaire', value: 'ban_temp' },
+          { name: 'Ban definitif', value: 'ban_def' },
         ))
     .addStringOption(option =>
       option.setName('raison').setDescription('Raison de la sanction').setRequired(true)
         .addChoices(...RAISONS_PREDEFINIES))
     .addStringOption(option =>
       option.setName('raison_custom')
-        .setDescription('Raison personnalisée (si "Raison personnalisée" choisi)')
+        .setDescription('Raison personnalisee si vous avez choisi Raison personnalisee')
         .setRequired(false))
     .addStringOption(option =>
       option.setName('duree')
-... (147lignes restantes)
+        .setDescription('Duree pour mute et ban temporaire uniquement')
+        .setRequired(false)
+        .addChoices(
+... (132lignes restantes)
