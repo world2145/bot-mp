@@ -21,13 +21,6 @@ http.createServer((req, res) => {
   console.log('Serveur HTTP actif sur le port ' + PORT);
 });
 
-const COULEURS = {
-  mute:     0xf5a623,
-  kick:     0xe67e22,
-  ban_temp: 0xe74c3c,
-  ban_def:  0x992d22,
-};
-
 const commands = [
   new SlashCommandBuilder()
     .setName('ban')
@@ -52,87 +45,7 @@ const commands = [
     })
     .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
     .toJSON(),
-
-  new SlashCommandBuilder()
-    .setName('mute')
-    .setDescription('Mettre en sourdine un membre')
-    .addUserOption(function(option) {
-      return option.setName('membre').setDescription('Le membre a mettre en sourdine').setRequired(true);
-    })
-    .addStringOption(function(option) {
-      return option.setName('duree').setDescription('Duree de la sourdine').setRequired(true)
-        .addChoices(
-          { name: '60 secondes', value: '60' },
-          { name: '5 minutes', value: '300' },
-          { name: '10 minutes', value: '600' },
-          { name: '1 heure', value: '3600' },
-          { name: '1 jour', value: '86400' },
-          { name: '1 semaine', value: '604800' }
-        );
-    })
-    .addStringOption(function(option) {
-      return option.setName('raison').setDescription('Raison de la sourdine').setRequired(false);
-    })
-    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
-    .toJSON(),
-
-  new SlashCommandBuilder()
-    .setName('sanction')
-    .setDescription('Annoncer une sanction (admin uniquement)')
-    .addUserOption(function(option) {
-      return option.setName('membre').setDescription('Le membre sanctionne').setRequired(true);
-    })
-    .addStringOption(function(option) {
-      return option.setName('type').setDescription('Type de sanction').setRequired(true)
-        .addChoices(
-          { name: 'Mute', value: 'mute' },
-          { name: 'Expulsion', value: 'kick' },
-          { name: 'Ban temporaire', value: 'ban_temp' },
-          { name: 'Ban definitif', value: 'ban_def' }
-        );
-    })
-    .addStringOption(function(option) {
-      return option.setName('raison').setDescription('Raison de la sanction').setRequired(true)
-        .addChoices(
-          { name: 'Spam', value: 'Spam' },
-          { name: 'Insultes / Toxicite', value: 'Insultes / Toxicite' },
-          { name: 'Publicite non autorisee', value: 'Publicite non autorisee' },
-          { name: 'Contenu inapproprie', value: 'Contenu inapproprie' },
-          { name: 'Raid / Nuisance au serveur', value: 'Raid / Nuisance au serveur' },
-          { name: 'Non-respect du reglement', value: 'Non-respect du reglement' },
-          { name: 'Raison personnalisee', value: 'CUSTOM' }
-        );
-    })
-    .addStringOption(function(option) {
-      return option.setName('raison_custom')
-        .setDescription('Raison personnalisee si vous avez choisi Raison personnalisee')
-        .setRequired(false);
-    })
-    .addStringOption(function(option) {
-      return option.setName('duree')
-        .setDescription('Duree pour mute et ban temporaire uniquement')
-        .setRequired(false)
-        .addChoices(
-          { name: '60 secondes', value: '60 secondes' },
-          { name: '5 minutes', value: '5 minutes' },
-          { name: '10 minutes', value: '10 minutes' },
-          { name: '1 heure', value: '1 heure' },
-          { name: '1 jour', value: '1 jour' },
-          { name: '1 semaine', value: '1 semaine' },
-          { name: '1 mois', value: '1 mois' }
-        );
-    })
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    .toJSON(),
 ];
-
-function dureeTexte(secondes) {
-  var map = {
-    60: '60 secondes', 300: '5 minutes', 600: '10 minutes',
-    3600: '1 heure', 86400: '1 jour', 604800: '1 semaine', 2419200: '1 mois',
-  };
-  return map[secondes] || (secondes + ' secondes');
-}
 
 client.once('ready', async function() {
   console.log('Bot connecte en tant que ' + client.user.tag);
@@ -148,12 +61,11 @@ client.once('ready', async function() {
 client.on('interactionCreate', async function(interaction) {
   if (!interaction.isChatInputCommand()) return;
 
-  var user   = interaction.options.getUser('membre');
-  var raison = interaction.options.getString('raison') || 'Aucune raison fournie';
-
   await interaction.deferReply({ ephemeral: true });
 
   if (interaction.commandName === 'ban') {
+    var user   = interaction.options.getUser('membre');
+    var raison = interaction.options.getString('raison') || 'Aucune raison fournie';
     try {
       await user.send('Tu as ete banni du serveur ' + interaction.guild.name + '.\nRaison : ' + raison + '\n\nPour faire une demande de debannissement : ' + APPEAL_LINK);
     } catch(e) { console.log('Impossible d envoyer un MP'); }
@@ -166,60 +78,18 @@ client.on('interactionCreate', async function(interaction) {
   }
 
   if (interaction.commandName === 'expulser') {
+    var user   = interaction.options.getUser('membre');
+    var raison = interaction.options.getString('raison') || 'Aucune raison fournie';
     try {
       await user.send('Tu as ete expulse du serveur ' + interaction.guild.name + '.\nRaison : ' + raison + '\n\nTu peux rejoindre ici : ' + APPEAL_LINK);
     } catch(e) { console.log('Impossible d envoyer un MP'); }
     try {
-      var member1 = await interaction.guild.members.fetch(user.id);
-      await member1.kick(raison);
+      var member = await interaction.guild.members.fetch(user.id);
+      await member.kick(raison);
       await interaction.editReply('Expulse : ' + user.tag + ' - Raison : ' + raison);
     } catch(e) {
       await interaction.editReply('Impossible d expulser ' + user.tag);
     }
-  }
-
-  if (interaction.commandName === 'mute') {
-    var duree = parseInt(interaction.options.getString('duree'));
-    try {
-      var member2 = await interaction.guild.members.fetch(user.id);
-      await member2.timeout(duree * 1000, raison);
-      await interaction.editReply('Mute : ' + user.tag + ' pendant ' + dureeTexte(duree) + ' - Raison : ' + raison);
-    } catch(e) {
-      await interaction.editReply('Impossible de muter ' + user.tag);
-    }
-  }
-
-  if (interaction.commandName === 'sanction') {
-    var type         = interaction.options.getString('type');
-    var raisonBrute  = interaction.options.getString('raison');
-    var raisonCustom = interaction.options.getString('raison_custom');
-    var raisonFinale = raisonBrute === 'CUSTOM'
-      ? (raisonCustom || 'Raison personnalisee non precisee')
-      : raisonBrute;
-    var dureeS = interaction.options.getString('duree');
-
-    if ((type === 'mute' || type === 'ban_temp') && !dureeS) {
-      return interaction.editReply('Tu dois renseigner une duree pour ce type de sanction.');
-    }
-
-    var fields = [
-      { name: 'Raison', value: raisonFinale, inline: false }
-    ];
-    if (dureeS && (type === 'mute' || type === 'ban_temp')) {
-      fields.push({ name: 'Duree', value: dureeS, inline: false });
-    }
-
-    var embed = {
-      color: COULEURS[type],
-      title: 'Sanction appliquee (by GM)',
-      fields: fields,
-      footer: {
-        text: 'Sanction appliquee par ' + interaction.user.tag
-      }
-    };
-
-    await interaction.channel.send({ embeds: [embed] });
-    await interaction.editReply('Annonce de sanction envoyee.');
   }
 });
 
