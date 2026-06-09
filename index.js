@@ -13,15 +13,7 @@ const client = new Client({
 client.on('guildMemberAdd', async (member) => {
     try {
         await member.send(
-            `🎉 Bienvenue sur le serveur Tokyo FR, ${member.user.username} !
-
-Nous sommes ravis de t'accueillir parmi nous.
-
-📌 Pense à lire les règles du serveur.
-
-❓ Si tu as des questions ou besoin d'aide, n'hésite pas à demander au staff, nous serons heureux de t'aider !
-
-Passe un excellent moment sur Tokyo FR !`
+           
         );
     } catch (error) {
         console.log("Impossible d'envoyer le message privé :", error);
